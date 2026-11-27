@@ -1,0 +1,631 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI-Powered Image Classification and Prediction System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f5f8;
+            color: #263238;
+            min-height: 100vh;
+            padding: 35px 15px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.10);
+        }
+
+        .header {
+            background: linear-gradient(120deg, #087c91, #08647c);
+            color: white;
+            text-align: center;
+            padding: 28px 15px;
+        }
+
+        .header h1 {
+            font-size: 25px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin-top: 9px;
+            font-size: 14px;
+            color: #e0f5fa;
+        }
+
+        .main {
+            padding: 35px;
+        }
+
+        .upload-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-section h2 {
+            color: #087c91;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .upload-section p {
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 22px;
+        }
+
+        .upload-box {
+            border: 2px dashed #9bbfc7;
+            background: #f8fbfc;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        input[type="file"] {
+            max-width: 100%;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .predict-btn {
+            display: block;
+            margin: 18px auto 0;
+            padding: 12px 35px;
+            background: #087c91;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .predict-btn:hover {
+            background: #065d70;
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 35px;
+        }
+
+        .result-section h2 {
+            text-align: center;
+            color: #087c91;
+            margin-bottom: 22px;
+        }
+
+        .result-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            align-items: center;
+            background: #f7fafb;
+            border: 1px solid #e1e9ec;
+            border-radius: 10px;
+            padding: 22px;
+        }
+
+        .image-area {
+            text-align: center;
+        }
+
+        .image-area img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .image-area p {
+            margin-top: 10px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        .prediction-area {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .prediction-area h3 {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .category {
+            font-size: 30px;
+            font-weight: bold;
+            color: #087c91;
+            text-transform: capitalize;
+            margin-bottom: 18px;
+        }
+
+        .confidence {
+            font-size: 17px;
+            color: #444;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .valid {
+            background: #d9f4e3;
+            color: #197443;
+        }
+
+        .invalid {
+            background: #ffe0e0;
+            color: #b42318;
+        }
+
+        .history-section {
+            margin-top: 45px;
+        }
+
+        .history-section h2 {
+            color: #087c91;
+            font-size: 21px;
+            margin-bottom: 18px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #e8f0f3;
+            color: #344c55;
+            padding: 14px;
+            text-align: center;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e8edef;
+        }
+
+        .history-image {
+            width: 55px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: #888;
+            padding: 25px;
+        }
+
+        .clear-btn {
+            display: block;
+            margin: 15px 0 0 auto;
+            padding: 9px 17px;
+            border: 1px solid #bd5555;
+            color: #bd5555;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .footer {
+            background: #f7fafb;
+            color: #777;
+            text-align: center;
+            padding: 17px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 650px) {
+            .main {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .result-card {
+                grid-template-columns: 1fr;
+            }
+
+            .category {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>AI-Powered Image Classification and Prediction System</h1>
+        <p>Deep Learning Based Animal Image Recognition Using MobileNetV2</p>
+    </header>
+
+    <main class="main">
+
+        <section class="upload-section">
+            <h2>Upload Animal Image</h2>
+            <p>Select an image to identify its animal category.</p>
+
+            <div class="upload-box">
+                <form id="uploadForm">
+
+                    <input
+                        type="file"
+                        id="imageInput"
+                        name="image"
+                        accept="image/jpeg,image/png"
+                        required
+                    >
+
+                    <button
+                        type="submit"
+                        class="predict-btn"
+                        id="predictBtn"
+                    >
+                        Predict Animal
+                    </button>
+
+                </form>
+            </div>
+        </section>
+
+        <section class="result-section" id="resultSection">
+
+            <h2>Prediction Result</h2>
+
+            <div class="result-card">
+
+                <div class="image-area">
+                    <img id="previewImage" alt="Uploaded animal image">
+                    <p>Uploaded Image</p>
+                </div>
+
+                <div class="prediction-area">
+
+                    <h3>Identified Category</h3>
+
+                    <div class="category" id="prediction">--</div>
+
+                    <div class="confidence">
+                        Confidence: <strong id="confidence">--</strong>
+                    </div>
+
+                    <span class="status" id="status"></span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="history-section">
+
+            <h2>Previous Results</h2>
+
+            <div class="table-wrapper">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Category</th>
+                            <th>Confidence</th>
+                            <th>Date & Time</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="historyBody"></tbody>
+                </table>
+
+            </div>
+
+            <button class="clear-btn" id="clearHistory">
+                Clear History
+            </button>
+
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        AI-Powered Image Classification and Prediction System
+    </footer>
+
+</div>
+
+<script>
+
+    // Clear previous history whenever the page is refreshed
+    localStorage.removeItem("animalHistory");
+
+    const form = document.getElementById("uploadForm");
+    const imageInput = document.getElementById("imageInput");
+    const predictBtn = document.getElementById("predictBtn");
+
+    const resultSection = document.getElementById("resultSection");
+    const previewImage = document.getElementById("previewImage");
+    const prediction = document.getElementById("prediction");
+    const confidence = document.getElementById("confidence");
+    const status = document.getElementById("status");
+    const historyBody = document.getElementById("historyBody");
+
+
+    // Get prediction history
+    function getHistory() {
+        try {
+            return JSON.parse(localStorage.getItem("animalHistory")) || [];
+        } catch {
+            return [];
+        }
+    }
+
+
+    // Generate SHA-256 hash to identify identical image files
+    async function getImageHash(file) {
+
+        const buffer = await file.arrayBuffer();
+
+        const hashBuffer = await crypto.subtle.digest(
+            "SHA-256",
+            buffer
+        );
+
+        return Array.from(new Uint8Array(hashBuffer))
+            .map(byte => byte.toString(16).padStart(2, "0"))
+            .join("");
+    }
+
+
+    // Save only unique images, maximum four results
+    function saveHistory(item) {
+
+        const history = getHistory();
+
+        const alreadyExists = history.some(
+            previous => previous.imageHash === item.imageHash
+        );
+
+        // Do not add duplicate image to history
+        if (alreadyExists) {
+            return;
+        }
+
+        history.unshift(item);
+
+        localStorage.setItem(
+            "animalHistory",
+            JSON.stringify(history.slice(0, 4))
+        );
+
+        displayHistory();
+    }
+
+
+    // Display previous predictions
+    function displayHistory() {
+
+        const history = getHistory();
+
+        historyBody.innerHTML = "";
+
+        if (history.length === 0) {
+
+            historyBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-history">
+                        No previous predictions available.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        history.forEach(item => {
+
+            const row = document.createElement("tr");
+
+            const imageCell = document.createElement("td");
+            const img = document.createElement("img");
+
+            img.src = item.image;
+            img.className = "history-image";
+            img.alt = "Previously uploaded image";
+
+            imageCell.appendChild(img);
+
+            const categoryCell = document.createElement("td");
+            categoryCell.textContent = item.category;
+
+            const confidenceCell = document.createElement("td");
+            confidenceCell.textContent = item.confidence;
+
+            const dateCell = document.createElement("td");
+            dateCell.textContent = item.date;
+
+            row.append(
+                imageCell,
+                categoryCell,
+                confidenceCell,
+                dateCell
+            );
+
+            historyBody.appendChild(row);
+
+        });
+    }
+
+
+    // Handle image prediction without page refresh
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const file = imageInput.files[0];
+
+        if (!file) {
+            alert("Please select an image first.");
+            return;
+        }
+
+        predictBtn.disabled = true;
+        predictBtn.textContent = "Predicting...";
+
+        try {
+
+            // Read image and preserve its preview data
+            const imageData = await new Promise((resolve, reject) => {
+
+                const reader = new FileReader();
+
+                reader.onload = () => resolve(reader.result);
+
+                reader.onerror = () => {
+                    reject(new Error("Unable to read image."));
+                };
+
+                reader.readAsDataURL(file);
+
+            });
+
+
+            // Identify the actual image content
+            const imageHash = await getImageHash(file);
+
+
+            // Send image to FastAPI
+            const formData = new FormData();
+
+            formData.append("image", file);
+
+            const response = await fetch("/predict", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Prediction failed.");
+            }
+
+
+            // Display uploaded image after successful prediction
+            previewImage.src = imageData;
+
+            prediction.textContent = data.prediction;
+
+            confidence.textContent = data.confidence;
+
+
+            // Display prediction status
+            const isInvalid =
+                data.prediction.toLowerCase() === "invalid input";
+
+            status.textContent = isInvalid
+                ? "Invalid Input"
+                : "Prediction Successful";
+
+            status.className = "status " +
+                (isInvalid ? "invalid" : "valid");
+
+            resultSection.style.display = "block";
+
+
+            // Add image only if it is not already in history
+            saveHistory({
+
+                image: imageData,
+
+                imageHash: imageHash,
+
+                category: data.prediction,
+
+                confidence: data.confidence,
+
+                date: new Date().toLocaleString()
+
+            });
+
+        } catch (error) {
+
+            alert(error.message);
+
+        } finally {
+
+            // Reset upload field after every prediction
+            predictBtn.disabled = false;
+
+            predictBtn.textContent = "Predict Animal";
+
+            imageInput.value = "";
+
+        }
+
+    });
+
+
+    // Clear history manually
+    document.getElementById("clearHistory")
+        .addEventListener("click", function() {
+
+            if (confirm("Are you sure you want to clear prediction history?")) {
+
+                localStorage.removeItem("animalHistory");
+
+                displayHistory();
+
+            }
+
+        });
+
+
+    // Load empty history when page opens
+    displayHistory();
+
+</script>
+
+</body>
+</html>
